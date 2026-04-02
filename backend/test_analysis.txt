@@ -1,0 +1,36 @@
+## TEST RESULTS ANALYSIS
+
+### PASS ✓
+1. Exact match: 40M chol 289 → "does NOT have heart disease" ✓
+2. Exact match: 49F chol 180 → "DOES have heart disease" ✓
+3. Exact match: 37M chol 283 → correct ✓
+4. Exact match: 54M chol 195 → found both matching patients ✓
+5. Must say YES: 37M chol 207 → correct ✓
+6. Substring trap: chol=28 → no patient found ✓
+7. Out of domain: geography → fallback ✓
+8. Hallucination trap: chol=999 → correctly said no such patient ✓
+9. Rewording: abbreviations ✓
+10. Rewording: informal ✓
+
+### FAIL ✗
+1. Must say YES: 49F chol 180 → Said "No" (wrong - HeartDisease=1)
+   CAUSE: The numeric regex matched "49" and "180" but also pulled in many other patients
+   that had status=0 and the LLM picked the wrong one. Need to be more precise.
+
+2. Multiple matches: sex only → Said "only one female patient" (wrong - many females)
+   CAUSE: k=5 semantic search only returns 5 docs, and regex can't help here.
+
+3. Aggregate: count heart disease → Said "5 patients, 4 have it" (wrong - 919 patients)
+   CAUSE: LLM only sees context window, can't count the whole dataset.
+
+4. Aggregate: oldest patient → Said "all 62 years old" (wrong)
+   CAUSE: Only saw k=5 similar docs.
+
+5. Aggregate: highest cholesterol → Said "54 yr old with 283" (wrong)
+   CAUSE: Same issue.
+
+6. Out of domain: medications → Hallucinated medication details instead of refusing
+   CAUSE: Prompt doesn't explicitly prevent offering medical advice outside the dataset.
+
+7. Exercise angina semantic → "none of them have exercise-induced angina" (wrong)
+   CAUSE: k=5 only pulled patients without angina into context.

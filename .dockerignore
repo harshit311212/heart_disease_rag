@@ -1,0 +1,11 @@
+node_modules/
+backend/__pycache__/
+backend/chroma_db/
+backend/error_log.txt
+backend/test_*.py
+frontend/dist/
+.git/
+.venv/
+env/
+.env
+launch_app.bat
