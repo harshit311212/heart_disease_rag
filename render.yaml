@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: heart-disease-rag
+    env: docker
+    plan: free
+    region: ohio
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: GROQ_API_KEY
+        sync: false
