@@ -10,14 +10,18 @@ RUN npm run build
 FROM python:3.11-slim
 WORKDIR /app
 
+# Force Python memory allocator to reduce fragmentation
+ENV MALLOC_ARENA_MAX=2
+
 # Install system dependencies for ChromaDB and other ML libs
 RUN apt-get update && apt-get install -y \
     build-essential \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies
+# Install Python dependencies (Force CPU-only PyTorch to save massive RAM)
 COPY requirements.txt .
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy dataset and code
@@ -29,4 +33,4 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 ENV PORT=8000
 EXPOSE 8000
 
-CMD ["python", "backend/main.py"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

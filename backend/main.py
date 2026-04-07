@@ -84,6 +84,11 @@ def initialize_system():
             f"Oldest: {df['Age'].max()}. Max Cholesterol: {df['Cholesterol'].max()}."
         )
 
+        # Free memory aggressively to stay under free tier limits
+        import gc
+        del df
+        gc.collect()
+
 # Initialize on startup
 initialize_system()
 
