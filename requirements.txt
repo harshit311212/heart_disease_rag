@@ -10,3 +10,4 @@ pydantic
 sentence-transformers
 langchain-groq
 python-multipart
+streamlit
