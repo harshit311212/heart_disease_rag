@@ -46,15 +46,22 @@ def load_system():
     all_patient_meta = []
     dataset_summary = ""
     
-    # 3. Load Vectorstore
+    # 3. Auto-ingest if DB missing
+    if not os.path.exists(CHROMA_PATH):
+        import subprocess
+        try:
+            # Provide feedback in console or UI if needed
+            subprocess.run(["python", os.path.join(BASE_DIR, "backend", "ingest.py")], check=True)
+        except Exception as e:
+            pass # Fail gracefully if ingestion fails
+
+    # 4. Load Vectorstore
     if os.path.exists(CHROMA_PATH):
         try:
             embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
             vectorstore = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings, collection_name="heart_disease")
-        except Exception as e:
-            st.error(f"Vectorstore init failed: {e}")
-    else:
-        st.warning(f"Vector DB missing at {CHROMA_PATH}. Please run the ingest.py script beforehand.")
+        except Exception:
+            pass
 
     # 4. Sync Raw Data for Heuristics
     if os.path.exists(DATASET_PATH):
